@@ -1,3 +1,4 @@
+[English Version](README_EN.md)
 # 🔍 聊天记录搜索
 <br>
 为SillyTavern设计的轻量插件。
