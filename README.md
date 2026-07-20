@@ -2,7 +2,7 @@
 # 🔍 聊天记录搜索
 <br>
 为SillyTavern设计的轻量插件。
-版本：1.2.0 | 作者：Thirteen-Moons
+版本：1.2.0 |  作者：Thirteen-Moons
 
 ---
 
