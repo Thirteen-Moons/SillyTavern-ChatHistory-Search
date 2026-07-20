@@ -78,4 +78,3 @@ See [LICENSE](./LICENSE).
 
 ## Welcome 🤝
 
-Based on [History-Search](https://github.com/xiu-12138/History-Search) by xiu-12138. Thanks to the original author.
