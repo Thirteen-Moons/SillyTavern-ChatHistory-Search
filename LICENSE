@@ -1,8 +1,7 @@
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
 
-Copyright (c) 2026 xiu-12138 (Original Author)
-Copyright (c) 2026 Thirteen-Moons (Modifier)
+Copyright (c) 2026 Thirteen-Moons(Author)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -16,15 +15,4 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-================================================================================
-ADDITIONAL ATTRIBUTION NOTICE
-================================================================================
-
-This project is based on History-Search, originally created by xiu-12138.
-https://github.com/xiu-12138/History-Search
-
-Subsequent modifications were made by:
-- Thirteen-Moons (2026)
-
 All modifications are released under AGPL-3.0.
