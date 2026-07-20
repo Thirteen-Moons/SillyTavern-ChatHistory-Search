@@ -59,6 +59,3 @@ See [LICENSE](./LICENSE).
 
 ---
 ## 欢迎使用🤝
-
-基于[History-Search
-](https://github.com/xiu-12138/History-Search)二次开发，感谢xiu-12138。
