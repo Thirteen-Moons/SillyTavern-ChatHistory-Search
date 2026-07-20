@@ -1,3 +1,42 @@
+const LS_KEY = 'historySearchTruncation';
+
+function getSavedTruncation() {
+    try {
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? Number(raw) : 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function setSavedTruncation(val) {
+    try {
+        if (val > 0) {
+            localStorage.setItem(LS_KEY, String(val));
+        } else {
+            localStorage.removeItem(LS_KEY);
+        }
+    } catch (e) {}
+}
+
+async function restoreLimitation() {
+    const saved = getSavedTruncation();
+    if (saved > 0) {
+        const $input = $('#chat_truncation');
+        if ($input.length) {
+            $input.val(saved).trigger('input');
+            setSavedTruncation(0);
+            
+            const context = SillyTavern.getContext();
+            if (context.reloadCurrentChat) {
+                await context.reloadCurrentChat();
+                toastr.info('已恢复消息加载限制', '', { timeOut: 3000 });
+            }
+        } else {
+            setSavedTruncation(0);
+        }
+    }
+}
 /* =========================
    窗口缩放
 ========================= */
@@ -83,7 +122,13 @@ function createToolbar() {
         if (chat) chat.scrollTop = 0;
         toolbar.remove();
     };
-    toolbar.querySelector('#ht-latest').onclick = () => {
+    toolbar.querySelector('#ht-bottom').onclick = async () => {
+        let chat = document.querySelector("#chat");
+        if (chat) chat.scrollTop = chat.scrollHeight;
+        await restoreLimitation();
+        toolbar.remove();
+    };
+    toolbar.querySelector('#ht-latest').onclick = async () => {
         let chatArr = SillyTavern.getContext().chat;
         if (!chatArr || chatArr.length === 0) return;
         let lastId = chatArr.length - 1;
@@ -94,15 +139,10 @@ function createToolbar() {
             let chat = document.querySelector("#chat");
             if (chat) chat.scrollTop = chat.scrollHeight;
         }
-        toolbar.remove();
-    };
-    toolbar.querySelector('#ht-bottom').onclick = () => {
-        let chat = document.querySelector("#chat");
-        if (chat) chat.scrollTop = chat.scrollHeight;
+        await restoreLimitation();
         toolbar.remove();
     };
 }
-
 /* =========================
    搜索面板
 ========================= */
@@ -131,7 +171,7 @@ function openHistoryPanel() {
             <span id="val-size">${s.size}</span>
         </div>
 
-        <div class="history-total">当前对话：${total} 条消息 (范围: 0 ~ ${total > 0 ? total - 1 : 0})</div>
+        <div class="history-total">当前对话：共0 ~ ${total > 0 ? total - 1 : 0}楼，跳转早期楼层需等待加载片刻</div>
         
         <div class="history-input-box">
             <input id="history-jump-input" type="number" placeholder="输入指定楼层 (如: 13)">
@@ -260,28 +300,54 @@ async function executeJump(id, visualItem = null) {
     try { total = SillyTavern.getContext().chat.length; } catch (e) {}
     
     if (id < 0 || id >= total) {
-        alert(`楼层输入错误，当前仅有 0 到 ${total > 0 ? total - 1 : 0} 楼。`);
+        toastr.error(`楼层输入错误，当前仅有 0 到 ${total > 0 ? total - 1 : 0} 楼。`);
         return;
     }
 
     let chatDOM = document.querySelector("#chat");
     if (!chatDOM) return;
 
-    let target = document.querySelector(`.mes[mesid="${id}"]`);
-    let maxRetries = 35;
-    
-    if (!target && visualItem) visualItem.style.opacity = "0.5";
-
-    while (!target && maxRetries > 0) {
-        chatDOM.scrollTop = 0; 
-        let topBtn = document.querySelector("#top-msgs-btn");
-        if (topBtn && topBtn.style.display !== "none") topBtn.click();
-        await new Promise(r => setTimeout(r, 250)); 
-        target = document.querySelector(`.mes[mesid="${id}"]`);
-        maxRetries--;
+    let target = document.querySelector(`.mes[mesid="${id}"]`);    
+    if (!target) {
+        const context = SillyTavern.getContext();
+        
+        const $truncationInput = $('#chat_truncation');
+        let currentLimit = 0;
+        if ($truncationInput.length) {
+            currentLimit = Number($truncationInput.val()) || 0;
+        }
+        
+        if (currentLimit > 0 && context.reloadCurrentChat) {
+            setSavedTruncation(currentLimit);
+            
+            $truncationInput.val(0).trigger('input');
+            await new Promise(r => setTimeout(r, 300)); 
+            
+            await context.reloadCurrentChat();
+            await new Promise(r => setTimeout(r, 1000)); 
+            
+            target = document.querySelector(`.mes[mesid="${id}"]`);
+            
+            if (target) {
+                toastr.info('已临时加载全部消息，后续请使用「回底」恢复加载限制', '', { timeOut: 5000 });
+            }
+        }
+        
+        if (!target) {
+            let showMore = document.querySelector('#show_more_messages');
+            let maxClicks = 30;
+            if (visualItem) visualItem.style.opacity = "0.5";
+            
+            while (!target && showMore && showMore.offsetParent !== null && maxClicks > 0) {
+                showMore.click();
+                await new Promise(r => setTimeout(r, 800));
+                target = document.querySelector(`.mes[mesid="${id}"]`);
+                showMore = document.querySelector('#show_more_messages');
+                maxClicks--;
+            }            
+            if (visualItem) visualItem.style.opacity = "1";
+        }
     }
-
-    if (visualItem) visualItem.style.opacity = "1";
 
     if (target) {
         target.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -295,9 +361,9 @@ async function executeJump(id, visualItem = null) {
             target.style.outline = "transparent"; 
             target.style.outlineOffset = "0px";
             target.style.borderRadius = "";
-        }, 2500);      
+        }, 2500);
     } else {
-        alert(`搜索超时：第 ${id} 楼的记录过于早期，请手动向上滚动加载更多记录后重试。`);
+        toastr.error(`搜索超时：第 ${id} 楼的记录过于早期，请手动向上滚动加载更多记录后重试。`);
     }
 }
 
@@ -372,4 +438,18 @@ function searchHistory() {
         injectWandMenu();
     }
     setTimeout(injectWandMenu, 2000);
+    
+    setTimeout(() => {
+        const saved = getSavedTruncation();
+        if (saved > 0) {
+            const $input = $('#chat_truncation');
+            const current = $input.length ? Number($input.val()) || 0 : 0;
+            if (current === 0) {
+                $input.val(saved).trigger('input');
+                setSavedTruncation(0);
+            } else {
+                setSavedTruncation(0);
+            }
+        }
+    }, 3000);
 })();
