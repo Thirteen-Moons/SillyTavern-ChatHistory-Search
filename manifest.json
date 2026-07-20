@@ -1,5 +1,5 @@
 {
-    "name": "chat-history-search",
+    "name": "SillyTavern-ChatHistory-Search",
     "display_name": "聊天记录搜索 -- by:十三",
     "description": "用于聊天记录搜索、跳转与快速回顶回底",
     "loading_order": 1,
