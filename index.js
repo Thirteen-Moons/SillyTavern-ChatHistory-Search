@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Thirteen-Moons
+// Licensed under AGPL-3.0; see LICENSE for full terms
+// Derivative works must retain attribution to Thirteen-Moons
+
 const LS_KEY = 'historySearchTruncation';
 
 function getSavedTruncation() {
