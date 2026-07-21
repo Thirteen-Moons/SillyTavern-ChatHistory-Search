@@ -1,7 +1,7 @@
-GNU AFFERO GENERAL PUBLIC LICENSE
-Version 3, 19 November 2007
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+                       Version 3, 19 November 2007
 
-Copyright (c) 2026 Thirteen-Moons(Author)
+Copyright (c) 2026 Thirteen-Moons (Original Author)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -15,4 +15,9 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
-All modifications are released under AGPL-3.0.
+
+### Additional Binding Term Pursuant to AGPLv3 Section 7(b)
+All distributions, modifications, and derivative works based on this project
+licensed under AGPL-3.0 must include explicit attribution and clear credit
+to the original author Thirteen-Moons in all public-facing documentation,
+source headers, and software user interfaces.
