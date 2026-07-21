@@ -1,64 +1,71 @@
 # 🔍 Chat History Search
-
 <br>
+A lightweight plugin built for SillyTavern.
 
-A lightweight extension for SillyTavern.
-
-Version: 1.2.0 | Author: Thirteen-Moons
+Version: 1.4.0 | Author: Thirteen-Moons
 
 ---
 
 ## ⭐ Features
-
-- Search chat history by keywords
-- Quick jump to top / bottom
-- Jump to a specific message index
+- Search past chat turns by keywords
+- Quick jump to top / bottom of chat
+- Jump directly to a specified chat turn number
+- View context messages adjacent to a target entry
 
 ---
 
-## ⚙ Panel Guide
-
-The shortcut button is located in the **Wand Menu** at the bottom-left of the input box, labeled **"Chat History Search"**.
-
+## ⚙ Panel Introduction
+The quick access button is located inside the magic wand menu at the bottom-left of the message input box, labeled *"Chat History Search"*.
 <br><br>
 
-### 📍 Quick Actions Panel
+### 📍 Hotkey Bar
+Click *"Chat History Search"* to open the shortcut panel.
 
-Click **"Chat History Search"** to open the quick actions panel.
-
-- **First button**: Search chat history
-- **Second button**: Jump to top
-  > The top position depends on how many messages you have set to load. To return to message 0, enter 0 in the search panel to jump directly.
-- **Third button**: Jump to the beginning of the latest message
-- **Fourth button**: Jump to the end of the latest message
-
+- **1st Button**: Search chat history
+- **2nd Button**: Jump to the top of loaded messages
+  > The "top" refers to the range of chat turns you have set to load. To jump to turn 0, enter `0` in the search panel.
+- **3rd Button**: Jump to the start of the latest message block
+- **4th Button**: Jump to the end of the latest message block
 <br>
 
 ### 💾 Search Panel
+- **Jump**: Enter a turn number to navigate directly to that entry
+- **Search**: Input keywords to open the *"Search Results Page"*
+  > Multiple keywords are supported; separate each keyword with a single space
+<br>
 
-- **Jump**: Enter a message index to jump to the corresponding message
-- **Search**: Enter a keyword to display messages containing that keyword
-- **Copy Message**: Click to copy the message content
-- **Jump to Result**: Click a searched message to jump directly to its position
+### ✅ Search Results Page
+- **Keyword Highlighting**: Keywords are highlighted with complementary colors, looks clean with any theme
+- **Jump to Matching Entries**: Click any matched chat entry to jump straight to its position
+- **Copy**: Copy the full text of the selected chat turn
+- **Preview Adjacent Turns**: Open the *"Preview Page"* to smoothly view context messages before and after the target entry
+<br>
+
+### 📃 Preview Page
+Scroll through surrounding messages freely; click the top-right button to copy the current chat entry.
+
 
 <br><br>
-
 ---
 
 ## 🖊 Changelog
-
 ### v1.2.0
+- **Feature Improvement**: Temporarily bypass SillyTavern's message load limits when jumping chat turns. Navigation is no longer restricted by load settings or the "Hide Assistant" toggle.
+  > Click any jump-to-bottom button to restore the original load limits.
 
-- **Improved**: Temporarily bypasses SillyTavern's message load limit during jumps, so navigation is no longer affected by this setting or the *Hidden Assistant* extension.
-  > Use any "Jump to Bottom" button to restore the load limit.
+- **UI Tweak**: Replaced default browser alert popups with custom modals
+<br>
 
-- **UI Polish**: Replaced native browser alerts with styled popup notifications.
-
+### v1.4.0
+- **Full Architecture Refactor**: Split search interface, results view and preview view into separate modules
+- **New Preview Page**: Smoothly browse adjacent chat turns without full page navigation
+- **Mobile Display Improvements**: The interface now shifts upward automatically when the soft keyboard pops up on mobile, preventing the input box from being covered
+- **Optimized Jump Logic**: Instead of temporarily loading all messages, the plugin only loads the minimal required range to reduce lag during jumps
 <br>
 
 ---
 
-## 📦 Installation
+## 📦 Installation Guide
 
 Clone or download this repository into your SillyTavern extensions directory.
 
