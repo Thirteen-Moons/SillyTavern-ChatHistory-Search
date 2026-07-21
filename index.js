@@ -37,6 +37,29 @@ async function restoreLimitation() {
         }
     }
 }
+
+async function copyToClipboard(text) {
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch (e) {}
+    
+    try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;inset:0;opacity:0;pointer-events:none;z-index:-1;';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+    } catch (e) {
+        return false;
+    }
+}
+
 /* =========================
    窗口缩放
 ========================= */
@@ -102,7 +125,6 @@ function createToolbar() {
     `;
     document.body.appendChild(toolbar);
 
-    // 点击外部关闭
     setTimeout(() => {
         const closeToolbar = (e) => {
             if (!toolbar.contains(e.target) && !e.target.closest('#history-search-menu-item')) {
@@ -143,13 +165,14 @@ function createToolbar() {
         toolbar.remove();
     };
 }
+
 /* =========================
    搜索面板
 ========================= */
 function openHistoryPanel() {
     updateMarkColor();
     let old = document.querySelector("#history-search-panel");
-    if (old) { old.remove(); return; }
+    if (old) { old.style.display = ''; old.remove(); return; }
 
     let total = 0;
     try { total = SillyTavern.getContext().chat.length; } catch (e) {}
@@ -182,13 +205,11 @@ function openHistoryPanel() {
             <input id="history-keyword" placeholder="输入关键词">
             <button id="history-search-start">搜索</button>
         </div>
-        <div id="history-result">待搜索...</div>
     `;
 
     document.body.appendChild(panel);
     applyHistoryScale(panel);
 
-    // 窗口缩放滑块
     let sliderSize = panel.querySelector("#slider-size");
     let valSize = panel.querySelector("#val-size");
     sliderSize.oninput = () => {
@@ -228,9 +249,12 @@ function escapeReg(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function highlightText(text, key) {
+function highlightText(text, keys) {
     let safe = escapeHtml(text);
-    let reg = new RegExp(escapeReg(key), "gi");
+    if (!Array.isArray(keys)) keys = [keys];
+    keys = keys.filter(k => k.length > 0);
+    if (keys.length === 0) return safe;
+    let reg = new RegExp('(' + keys.map(escapeReg).join('|') + ')', 'gi');
     return safe.replace(reg, "<mark>$&</mark>");
 }
 
@@ -318,9 +342,14 @@ async function executeJump(id, visualItem = null) {
         }
         
         if (currentLimit > 0 && context.reloadCurrentChat) {
-            setSavedTruncation(currentLimit);
+            if (getSavedTruncation() === 0) {
+                setSavedTruncation(currentLimit);
+            }
             
-            $truncationInput.val(0).trigger('input');
+            let needLoad = (total - id) + 5;
+            let tempLimit = needLoad >= total ? 0 : needLoad;
+            
+            $truncationInput.val(tempLimit).trigger('input');
             await new Promise(r => setTimeout(r, 300)); 
             
             await context.reloadCurrentChat();
@@ -329,7 +358,11 @@ async function executeJump(id, visualItem = null) {
             target = document.querySelector(`.mes[mesid="${id}"]`);
             
             if (target) {
-                toastr.info('已临时加载全部消息，后续请使用「回底」恢复加载限制', '', { timeOut: 5000 });
+                if (tempLimit === 0) {
+                    toastr.info('已临时加载全部消息，后续请使用「回底」恢复加载限制', '', { timeOut: 5000 });
+                } else {
+                    toastr.info(`已临时加载 ${needLoad} 条消息，后续请使用「回底」恢复加载限制`, '', { timeOut: 5000 });
+                }
             }
         }
         
@@ -362,6 +395,10 @@ async function executeJump(id, visualItem = null) {
             target.style.outlineOffset = "0px";
             target.style.borderRadius = "";
         }, 2500);
+        
+        document.querySelector("#history-search-panel")?.remove();
+        document.querySelector("#history-results-panel")?.remove();
+        document.querySelector("#history-preview-panel")?.remove();
     } else {
         toastr.error(`搜索超时：第 ${id} 楼的记录过于早期，请手动向上滚动加载更多记录后重试。`);
     }
@@ -369,59 +406,183 @@ async function executeJump(id, visualItem = null) {
 
 function searchHistory() {
     let input = document.querySelector("#history-keyword");
-    let key = input.value.trim();
-    let result = document.querySelector("#history-result");
-
-    if (!key) {
-        result.innerHTML = "请输入关键词";
+    let rawKey = input.value.trim();
+    
+    if (!rawKey) {
+        toastr.error("请输入关键词");
         return;
     }
-
+    
+    let keys = rawKey.split(/\s+/).filter(k => k.length > 0);
+    if (keys.length === 0) {
+        toastr.error("请输入关键词");
+        return;
+    }
+    
     let chat = SillyTavern.getContext().chat;
     let found = [];
-
+    
     chat.forEach((msg, index) => {
         let text = msg.mes || "";
-        if (text.toLowerCase().includes(key.toLowerCase())) {
+        let lowerText = text.toLowerCase();
+        if (keys.every(k => lowerText.includes(k.toLowerCase()))) {
             found.push({ index: index, name: msg.name || "未知", text: text });
         }
     });
-
+    
     if (found.length === 0) {
-        result.innerHTML = "未搜索到：" + key;
+        toastr.info("未搜索到：" + rawKey);
         return;
     }
+    
+    openResultsPanel(found, keys, rawKey);
+}
 
-    result.innerHTML = `
-        <div class="history-count">搜索到 ${found.length} 条消息</div>
-    ` + found.map((item) => {
-        return `
-            <div class="history-item" data-id="${item.index}">
-                <div class="history-number">${item.index} 楼</div>
-                <div class="history-name">${escapeHtml(item.name)}</div>
-                <div class="history-message">${highlightText(item.text, key)}</div>
-                <button class="history-copy">复制楼层</button>
-            </div>
-        `;
-    }).join("");
-
-    document.querySelectorAll(".history-copy").forEach((btn) => {
-        btn.onclick = (e) => {
+function openResultsPanel(found, keys, rawKey) {
+    const searchPanel = document.querySelector("#history-search-panel");
+    if (searchPanel) searchPanel.style.display = 'none';
+    
+    let old = document.querySelector("#history-results-panel");
+    if (old) old.remove();
+    
+    let panel = document.createElement("div");
+    panel.id = "history-results-panel";
+    applyHistoryScale(panel);
+    
+    panel.innerHTML = `
+        <div class="results-header">
+            <button class="results-back" title="返回搜索面板">&lt;</button>
+            <span>搜索到 ${found.length} 条消息</span>
+            <button class="results-close" title="关闭">&times;</button>
+        </div>
+        <div class="results-content">
+            ${found.map((item) => `
+                <div class="results-item" data-id="${item.index}">
+                    <div class="results-item-header">
+                        <div class="results-meta">
+                            <div class="results-number">${item.index} 楼</div>
+                            <div class="results-name">${escapeHtml(item.name)}</div>
+                        </div>
+                        <div class="results-actions">
+                            <button class="results-copy">复制</button>
+                            <button class="results-preview">预览相邻楼层</button>
+                        </div>
+                    </div>
+                    <div class="results-message">${highlightText(item.text, keys)}</div>
+                </div>
+            `).join("")}
+        </div>
+    `;
+    
+    document.body.appendChild(panel);
+    
+    panel.querySelector(".results-back").onclick = () => {
+        panel.remove();
+        if (searchPanel) searchPanel.style.display = '';
+    };
+    
+    panel.querySelector(".results-close").onclick = () => {
+        panel.remove();
+        searchPanel?.remove();
+    };
+    
+    panel.querySelectorAll(".results-copy").forEach((btn) => {
+        btn.onclick = async (e) => {
             e.stopPropagation();
-            let id = Number(btn.parentElement.dataset.id);
+            let id = Number(btn.closest('.results-item').dataset.id);
+            let chat = SillyTavern.getContext().chat;
             let msg = chat[id];
             if (msg) {
-                navigator.clipboard.writeText(msg.mes || "");
-                btn.innerText = "已复制";
-                setTimeout(() => { btn.innerText = "复制楼层"; }, 1500);
+                const success = await copyToClipboard(msg.mes || "");
+                btn.innerText = success ? "已复制" : "失败";
+                setTimeout(() => { btn.innerText = "复制"; }, 1500);
             }
         };
     });
-
-    document.querySelectorAll(".history-item").forEach(item => {
-        item.onclick = () => {
+    
+    panel.querySelectorAll(".results-preview").forEach((btn) => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            let id = Number(btn.closest('.results-item').dataset.id);
+            panel.style.display = 'none';
+            openPreviewPanel(id, panel);
+        };
+    });
+    
+    panel.querySelectorAll(".results-item").forEach(item => {
+        item.onclick = (e) => {
+            if (e.target.closest('button')) return;
             let id = item.dataset.id;
             executeJump(id, item);
+        };
+    });
+}
+
+function openPreviewPanel(centerId, parentPanel = null) {
+    let old = document.querySelector("#history-preview-panel");
+    if (old) old.remove();
+
+    let chat = SillyTavern.getContext().chat;
+    if (!chat || chat.length === 0) return;
+
+    let start = Math.max(0, centerId - 2);
+    let end = Math.min(chat.length - 1, centerId + 2);
+
+    let panel = document.createElement("div");
+    panel.id = "history-preview-panel";
+    applyHistoryScale(panel);
+
+    let html = `
+        <div class="preview-header">
+            <button class="preview-back" title="返回">&lt;</button>
+            <span>预览 ${start} ~ ${end} 楼</span>
+            <button class="preview-close" title="关闭">&times;</button>
+        </div>
+        <div class="preview-content">
+    `;
+
+    for (let i = start; i <= end; i++) {
+        let msg = chat[i];
+        html += `
+            <div class="preview-item" data-index="${i}">
+                <div class="preview-item-header">
+                    <div class="preview-number">${i} 楼</div>
+                    <button class="preview-copy" title="复制该消息"><i class="fa-regular fa-copy"></i></button>
+                </div>
+                <div class="preview-name">${escapeHtml(msg.name || "未知")}</div>
+                <div class="preview-message">${escapeHtml(msg.mes || "")}</div>
+            </div>
+        `;
+    }
+
+    html += `</div>`;
+    panel.innerHTML = html;
+    document.body.appendChild(panel);
+
+    panel.querySelector(".preview-back").onclick = () => {
+        panel.remove();
+        if (parentPanel) {
+            parentPanel.style.display = '';
+        }
+    };
+
+    panel.querySelector(".preview-close").onclick = () => {
+        panel.remove();
+        document.querySelector("#history-search-panel")?.remove();
+        document.querySelector("#history-results-panel")?.remove();
+    };
+
+    panel.querySelectorAll(".preview-copy").forEach(btn => {
+        btn.onclick = async (e) => {
+            e.stopPropagation();
+            let idx = Number(btn.closest('.preview-item').dataset.index);
+            let msg = chat[idx];
+            if (msg) {
+                const success = await copyToClipboard(msg.mes || "");
+                let original = btn.innerHTML;
+                btn.innerHTML = success ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>';
+                setTimeout(() => { btn.innerHTML = original; }, 1500);
+            }
         };
     });
 }
@@ -452,4 +613,14 @@ function searchHistory() {
             }
         }
     }, 3000);
+    
+    if (window.visualViewport) {
+        const handleViewport = () => {
+            const keyboardHeight = window.innerHeight - window.visualViewport.height;
+            const isMobile = window.innerWidth <= 600;
+            const panels = document.querySelectorAll('#history-search-panel, #history-results-panel, #history-preview-panel');
+            panels.forEach(p => p.classList.toggle('keyboard-open', isMobile && keyboardHeight > 100));
+        };
+        window.visualViewport.addEventListener('resize', handleViewport);
+    }
 })();
