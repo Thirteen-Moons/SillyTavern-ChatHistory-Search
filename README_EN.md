@@ -24,8 +24,7 @@ Click *"Chat History Search"* to open the shortcut panel.
 - **1st Button**: Search chat history
 - **2nd Button**: Jump to the top of loaded messages
   > The "top" refers to the range of chat turns you have set to load. To jump to turn 0, enter `0` in the search panel.
-- **3rd Button**: Jump to the start of the latest message block
-- **4th Button**: Jump to the end of the latest message block
+- **3rd Button**: Jump to the end of the latest message block
 <br>
 
 ### 💾 Search Panel
@@ -51,7 +50,7 @@ Scroll through surrounding messages freely; click the top-right button to copy t
 ## 🖊 Changelog
 ### v1.2.0
 - **Feature Improvement**: Temporarily bypass SillyTavern's message load limits when jumping chat turns. Navigation is no longer restricted by load settings or the "Hide Assistant" toggle.
-  > Click any jump-to-bottom button to restore the original load limits.
+  > Click jump-to-bottom button to restore the original load limits.
 
 - **UI Tweak**: Replaced default browser alert popups with custom modals
 <br>
