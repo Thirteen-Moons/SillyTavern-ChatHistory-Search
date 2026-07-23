@@ -2,7 +2,7 @@
 <br>
 A lightweight plugin built for SillyTavern.
 
-Version: 1.4.0 | Author: Thirteen-Moons
+Version: 1.5.0 | Author: Thirteen-Moons
 
 ---
 
@@ -51,8 +51,6 @@ Scroll through surrounding messages freely; click the top-right button to copy t
 ### v1.2.0
 - **Feature Improvement**: Temporarily bypass SillyTavern's message load limits when jumping chat turns. Navigation is no longer restricted by load settings or the "Hide Assistant" toggle.
   > Click jump-to-bottom button to restore the original load limits.
-
-- **UI Tweak**: Replaced default browser alert popups with custom modals
 <br>
 
 ### v1.4.0
