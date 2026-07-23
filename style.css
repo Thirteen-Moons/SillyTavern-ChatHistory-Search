@@ -3,17 +3,17 @@ Copyright (c) 2026 Thirteen-Moons
 Licensed under AGPL-3.0; see LICENSE for full terms
 Derivative works must retain attribution to Thirteen-Moons
 ========================= */
+/* 聊天记录搜索 v1.5.0 */
 
-/* 聊天记录搜索 v1.4.0 */
 /* =========================
    魔棒菜单项
 ========================= */
-#history-search-menu-item { cursor: pointer; }
+#chat-search-menu-item { cursor: pointer; }
 
 /* =========================
    横条工具栏
 ========================= */
-#history-toolbar {
+#chat-search-toolbar {
     position: fixed;
     top: 45%;
     left: 50%;
@@ -32,7 +32,7 @@ Derivative works must retain attribution to Thirteen-Moons
     gap: 12px;
 }
 
-#history-toolbar button {
+#chat-search-toolbar button {
     flex: 1;
     height: 44px;
     border-radius: 12px;
@@ -42,44 +42,43 @@ Derivative works must retain attribution to Thirteen-Moons
     justify-content: center;
 }
 
-#history-toolbar button:hover {
+#chat-search-toolbar button:hover {
     background: rgba(255,255,255,0.1);
 }
 
 /* =========================
    搜索面板
 ========================= */
-#history-search-panel {
+#chat-search-panel {
     position: fixed;
-    top: 70px;
+    top: 80px;
     left: 50%;
     transform: translateX(-50%);
-    width: calc(520px * var(--hs-scale));
+    width: 500px;
     max-width: calc(100vw - 24px);
     padding: 16px;
     border-radius: 18px;
     background: var(--SmartThemeBlurTintColor);
     z-index: 999999;
     box-shadow: 0 8px 30px rgba(0,0,0,.45);
-    --hs-scale: 1;
-    font-size: calc(14px * var(--hs-scale));
+    font-size: 14px;
 }
 
-#history-search-panel,
-#history-search-panel * {
+#chat-search-panel,
+#chat-search-panel * {
     box-sizing: border-box;
 }
 
-#history-search-panel .history-header {
+.search-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: calc(20px * var(--hs-scale));
+    font-size: 20px;
     font-weight: bold;
     margin-bottom: 10px;
 }
 
-#history-close {
+#search-close {
     width: 24px;
     height: 24px;
     border-radius: 50%;
@@ -96,53 +95,35 @@ Derivative works must retain attribution to Thirteen-Moons
     transition: 0.15s;
 }
 
-#history-close:hover {
+#search-close:hover {
     background: rgba(255,255,255,0.1);
 }
 
-.history-scale-inline {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.search-divider {
+    height: 1px;
+    background: var(--SmartThemeTextColor, rgba(255,255,255,0.3));
+    opacity: 0.4;
     margin-bottom: 12px;
-    padding: 4px 0;
-    font-size: 0.9em;
-    opacity: 0.9;
 }
 
-.history-scale-inline input[type="range"] {
-    flex: 1;
-    cursor: pointer;
-    height: 6px;
-    border-radius: 3px;
-    accent-color: #ff9800;
-}
-
-.history-scale-inline span {
-    min-width: 35px;
-    text-align: right;
-    font-family: monospace;
-    font-size: 0.9em;
-}
-
-.history-total {
+.search-total {
     opacity: .7;
     font-size: 14px;
     margin-bottom: 12px;
 }
 
-.history-input-box {
+.search-input-row {
     display: flex;
     gap: 8px;
     margin-bottom: 10px;
 }
 
-.history-input-box:last-of-type {
+.search-input-row:last-of-type {
     margin-bottom: 0;
 }
 
-#history-keyword,
-#history-jump-input {
+#search-keyword,
+#search-jump-input {
     flex: 1;
     padding: 10px;
     border-radius: 10px;
@@ -152,14 +133,14 @@ Derivative works must retain attribution to Thirteen-Moons
     border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.15));
 }
 
-#history-keyword::placeholder,
-#history-jump-input::placeholder {
+#search-keyword::placeholder,
+#search-jump-input::placeholder {
     color: var(--SmartThemeTextColor, #fff);
     opacity: 0.5;
 }
 
-#history-jump-btn,
-#history-search-start {
+#search-jump-btn,
+#search-start-btn {
     padding: 6px 14px;
     border-radius: 10px;
     cursor: pointer;
@@ -167,27 +148,23 @@ Derivative works must retain attribution to Thirteen-Moons
     color: var(--SmartThemeTextColor);
     border: 1px dashed var(--SmartThemeTextColor, rgba(255,255,255,0.4));
     transition: 0.15s;
+    font-size: 15px;
 }
 
-#history-jump-btn:hover,
-#history-search-start:hover {
+#search-jump-btn:hover,
+#search-start-btn:hover {
     background: rgba(255,255,255,0.1);
-}
-
-#history-search-panel input,
-#history-search-panel button {
-    font-size: calc(15px * var(--hs-scale));
 }
 
 /* =========================
    结果页
 ========================= */
-#history-results-panel {
+#search-results-panel {
     position: fixed;
-    top: 70px;
+    top: 80px;
     left: 50%;
     transform: translateX(-50%);
-    width: calc(520px * var(--hs-scale));
+    width: 500px;
     max-width: calc(100vw - 24px);
     max-height: 80vh;
     padding: 16px;
@@ -198,12 +175,11 @@ Derivative works must retain attribution to Thirteen-Moons
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    --hs-scale: 1;
-    font-size: calc(14px * var(--hs-scale));
+    font-size: 14px;
 }
 
-#history-results-panel,
-#history-results-panel * {
+#search-results-panel,
+#search-results-panel * {
     box-sizing: border-box;
 }
 
@@ -211,9 +187,27 @@ Derivative works must retain attribution to Thirteen-Moons
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: calc(20px * var(--hs-scale));
+    font-size: 20px;
     font-weight: bold;
     margin-bottom: 10px;
+}
+
+.results-title-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.results-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.results-hint {
+    font-size: 0.55em;
+    opacity: 0.6;
+    color: var(--SmartThemeTextColor);
 }
 
 .results-back,
@@ -318,21 +312,21 @@ Derivative works must retain attribution to Thirteen-Moons
 }
 
 mark {
-    background: var(--history-mark-bg, #ffd54a);
+    background: var(--chat-search-mark-bg, #ffd54a);
     color: #000;
     border-radius: 4px;
     padding: 1px 3px;
 }
 
-/* =========================
+/* =========================mark
    预览面板
 ========================= */
-#history-preview-panel {
+#message-preview-panel {
     position: fixed;
-    top: 70px;
+    top: 80px;
     left: 50%;
     transform: translateX(-50%);
-    width: calc(520px * var(--hs-scale));
+    width: 500px;
     max-width: calc(100vw - 24px);
     max-height: 80vh;
     padding: 16px;
@@ -343,12 +337,11 @@ mark {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    --hs-scale: 1;
-    font-size: calc(14px * var(--hs-scale));
+    font-size: 14px;
 }
 
-#history-preview-panel,
-#history-preview-panel * {
+#message-preview-panel,
+#message-preview-panel * {
     box-sizing: border-box;
 }
 
@@ -356,7 +349,7 @@ mark {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: calc(20px * var(--hs-scale));
+    font-size: 20px;
     font-weight: bold;
     margin-bottom: 10px;
 }
@@ -445,13 +438,12 @@ mark {
 ========================= */
 @media(max-width:600px) {
     html, body {
+        /* 修复 ST 移动端 body 隐式 transform 导致 fixed 定位失效的问题 */
         transform: none !important;
         perspective: none !important;
-        filter: none !important;
-        contain: none !important;
     }
     
-    #history-search-panel {
+    #chat-search-panel {
         width: calc(100vw - 24px) !important;
         left: 50vw !important;
         transform: translateX(-50%) !important;
@@ -459,8 +451,8 @@ mark {
         bottom: auto !important;
     }
     
-    #history-results-panel,
-    #history-preview-panel {
+    #search-results-panel,
+    #message-preview-panel {
         width: calc(100vw - 24px) !important;
         left: 50vw !important;
         transform: translateX(-50%) !important;
@@ -469,16 +461,16 @@ mark {
         max-height: 75vh !important;
     }
     
-    #history-search-panel.keyboard-open,
-    #history-results-panel.keyboard-open,
-    #history-preview-panel.keyboard-open {
+    #chat-search-panel.keyboard-open,
+    #search-results-panel.keyboard-open,
+    #message-preview-panel.keyboard-open {
         top: 2vh !important;
         max-height: 40vh !important;
         left: 50vw !important;
         transform: translateX(-50%) !important;
     }
     
-    #history-toolbar {
+    #chat-search-toolbar {
         width: calc(100vw - 48px);
         top: 50vh;
         left: 50vw;
