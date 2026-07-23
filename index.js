@@ -2,7 +2,7 @@
 // Licensed under AGPL-3.0; see LICENSE for full terms
 // Derivative works must retain attribution to Thirteen-Moons
 
-const LS_KEY = 'historySearchTruncation';
+const LS_KEY = 'chatSearchTruncation';
 
 function getSavedTruncation() {
     try {
@@ -65,28 +65,16 @@ async function copyToClipboard(text) {
 }
 
 /* =========================
-   窗口缩放
-========================= */
-function getHistoryScale() {
-    return JSON.parse(localStorage.getItem('historySearchScale') || '{"size":1}');
-}
-function saveHistoryScale(v) { localStorage.setItem('historySearchScale', JSON.stringify(v)); }
-function applyHistoryScale(panel) {
-    let s = getHistoryScale();
-    panel.style.setProperty('--hs-scale', s.size);
-}
-
-/* =========================
    魔棒菜单注入
 ========================= */
 function injectWandMenu() {
     const tryInject = () => {
         const $menu = $('#extensionsMenu');
         if ($menu.length === 0) return false;
-        if ($menu.find('#history-search-menu-item').length > 0) return true;
+        if ($menu.find('#chat-search-menu-item').length > 0) return true;
 
         const $item = $(`
-            <div class="list-group-item flex-container flexGap5 interactable" id="history-search-menu-item">
+            <div class="list-group-item flex-container flexGap5 interactable" id="chat-search-menu-item">
                 <div class="fa-solid fa-search fa-flip-horizontal fa-fw extensions-icon" style="width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
                 聊天记录搜索
             </div>
@@ -110,7 +98,7 @@ function injectWandMenu() {
    横条工具栏
 ========================= */
 function toggleToolbar() {
-    const existing = document.querySelector('#history-toolbar');
+    const existing = document.querySelector('#chat-search-toolbar');
     if (existing) {
         existing.remove();
         return;
@@ -120,18 +108,17 @@ function toggleToolbar() {
 
 function createToolbar() {
     const toolbar = document.createElement('div');
-    toolbar.id = 'history-toolbar';
+    toolbar.id = 'chat-search-toolbar';
     toolbar.innerHTML = `
         <button id="ht-search" class="menu_button" title="搜索聊天记录"><i class="fa-solid fa-search fa-flip-horizontal"></i></button>
         <button id="ht-top" class="menu_button" title="跳转至聊天顶部（顶部取决于你设置加载了多少条消息）"><i class="fa-solid fa-arrow-up"></i></button>
-        <button id="ht-latest" class="menu_button" title="跳转至最后一条消息开头"><i class="fa-solid fa-arrow-up-from-bracket fa-flip-vertical"></i></button>
         <button id="ht-bottom" class="menu_button" title="回到底部最新消息末尾"><i class="fa-solid fa-arrow-down"></i></button>
     `;
     document.body.appendChild(toolbar);
 
     setTimeout(() => {
         const closeToolbar = (e) => {
-            if (!toolbar.contains(e.target) && !e.target.closest('#history-search-menu-item')) {
+            if (!toolbar.contains(e.target) && !e.target.closest('#chat-search-menu-item')) {
                 toolbar.remove();
                 document.removeEventListener('click', closeToolbar);
             }
@@ -141,7 +128,7 @@ function createToolbar() {
 
     toolbar.querySelector('#ht-search').onclick = () => {
         toolbar.remove();
-        openHistoryPanel();
+        openSearchPanel();
     };
     toolbar.querySelector('#ht-top').onclick = () => {
         let chat = document.querySelector("#chat");
@@ -154,111 +141,80 @@ function createToolbar() {
         await restoreLimitation();
         toolbar.remove();
     };
-    toolbar.querySelector('#ht-latest').onclick = async () => {
-        let chatArr = SillyTavern.getContext().chat;
-        if (!chatArr || chatArr.length === 0) return;
-        let lastId = chatArr.length - 1;
-        let target = document.querySelector('.mes[mesid="' + lastId + '"]');
-        if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-            let chat = document.querySelector("#chat");
-            if (chat) chat.scrollTop = chat.scrollHeight;
-        }
-        await restoreLimitation();
-        toolbar.remove();
-    };
 }
 
 /* =========================
    搜索面板
 ========================= */
-function openHistoryPanel() {
+function openSearchPanel() {
     updateMarkColor();
-    let old = document.querySelector("#history-search-panel");
-    if (old) { old.style.display = ''; old.remove(); return; }
+    let old = document.querySelector("#chat-search-panel");
+    if (old) { old.remove(); return; }
 
     let total = 0;
     try { total = SillyTavern.getContext().chat.length; } catch (e) {}
 
     let panel = document.createElement("div");
-    panel.id = "history-search-panel";
-
-    let s = getHistoryScale();
+    panel.id = "chat-search-panel";
 
     panel.innerHTML = `
-        <div class="history-header">
+        <div class="search-header">
             <span><i class="fa-solid fa-search fa-flip-horizontal" style="margin-right:6px;"></i>聊天记录搜索</span>
-            <button id="history-close">&times;</button>
+            <button id="search-close">&times;</button>
         </div>
         
-        <div class="history-scale-inline">
-            <label>窗口大小:</label>
-            <input type="range" id="slider-size" min="0.7" max="1.8" step="0.05" value="${s.size}">
-            <span id="val-size">${s.size}</span>
-        </div>
+        <div class="search-divider"></div>
 
-        <div class="history-total">当前对话：共0 ~ ${total > 0 ? total - 1 : 0}楼，跳转早期楼层需等待加载片刻</div>
+        <div class="search-total">当前对话：共0 ~ ${total > 0 ? total - 1 : 0}楼，跳转早期楼层需等待加载片刻</div>
         
-        <div class="history-input-box">
-            <input id="history-jump-input" type="number" placeholder="输入指定楼层 (如: 13)">
-            <button id="history-jump-btn">跳转</button>
+        <div class="search-input-row">
+            <input id="search-jump-input" type="number" placeholder="输入指定楼层 (如: 13)">
+            <button id="search-jump-btn">跳转</button>
         </div>
 
-        <div class="history-input-box">
-            <input id="history-keyword" placeholder="输入关键词">
-            <button id="history-search-start">搜索</button>
+        <div class="search-input-row">
+            <input id="search-keyword" placeholder="输入关键词">
+            <button id="search-start-btn">搜索</button>
         </div>
     `;
 
     document.body.appendChild(panel);
-    applyHistoryScale(panel);
 
-    let sliderSize = panel.querySelector("#slider-size");
-    let valSize = panel.querySelector("#val-size");
-    sliderSize.oninput = () => {
-        let x = getHistoryScale();
-        x.size = Number(sliderSize.value);
-        valSize.textContent = x.size.toFixed(2);
-        saveHistoryScale(x);
-        applyHistoryScale(panel);
-    };
-
-    panel.querySelector("#history-close").onclick = () => { panel.remove(); };
-    panel.querySelector("#history-search-start").onclick = () => { searchHistory(); };
+    panel.querySelector("#search-close").onclick = () => { panel.remove(); };
+    panel.querySelector("#search-start-btn").onclick = () => { performSearch(); };
     
-    panel.querySelector("#history-keyword").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") searchHistory();
+    panel.querySelector("#search-keyword").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") performSearch();
     });
 
-    panel.querySelector("#history-jump-btn").onclick = () => { 
-        let floor = panel.querySelector("#history-jump-input").value;
+    panel.querySelector("#search-jump-btn").onclick = () => { 
+        let floor = panel.querySelector("#search-jump-input").value;
         if (floor !== "") {
-            executeJump(Number(floor));
+            jumpToFloor(Number(floor));
         }
     };
-    panel.querySelector("#history-jump-input").addEventListener("keypress", function(e) {
+    panel.querySelector("#search-jump-input").addEventListener("keypress", function(e) {
         if (e.key === "Enter") {
             let floor = this.value;
-            if (floor !== "") executeJump(Number(floor));
+            if (floor !== "") jumpToFloor(Number(floor));
         }
     });
 }
 
-function escapeHtml(str) {
+function sanitizeHtml(str) {
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function escapeReg(str) {
+function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function highlightText(text, keys) {
-    let safe = escapeHtml(text);
+function markKeywords(text, keys) {
+    let safe = sanitizeHtml(text);
     if (!Array.isArray(keys)) keys = [keys];
     keys = keys.filter(k => k.length > 0);
     if (keys.length === 0) return safe;
-    let reg = new RegExp('(' + keys.map(escapeReg).join('|') + ')', 'gi');
+    let reg = new RegExp('(' + keys.map(escapeRegex).join('|') + ')', 'gi');
     return safe.replace(reg, "<mark>$&</mark>");
 }
 
@@ -317,13 +273,14 @@ function updateMarkColor() {
         const [h] = rgbToHsl(r, g, b);
         const newH = (h + 180) % 360;
         const [nr, ng, nb] = hslToRgb(newH, 85, 64);
-        document.documentElement.style.setProperty('--history-mark-bg', `rgb(${nr}, ${ng}, ${nb})`);
+        document.documentElement.style.setProperty('--chat-search-mark-bg', `rgb(${nr}, ${ng}, ${nb})`);
     } catch (e) {
-        document.documentElement.style.setProperty('--history-mark-bg', '#ffd54a');
+        document.documentElement.style.setProperty('--chat-search-mark-bg', '#ffd54a');
     }
 }
 
-async function executeJump(id, visualItem = null) {
+async function jumpToFloor(id, visualItem = null) {
+    id = Number(id);
     let total = 0;
     try { total = SillyTavern.getContext().chat.length; } catch (e) {}
     
@@ -357,9 +314,13 @@ async function executeJump(id, visualItem = null) {
             await new Promise(r => setTimeout(r, 300)); 
             
             await context.reloadCurrentChat();
-            await new Promise(r => setTimeout(r, 1000)); 
             
-            target = document.querySelector(`.mes[mesid="${id}"]`);
+            let pollCount = 0;
+            while (!target && pollCount < 30) {
+                await new Promise(r => setTimeout(r, 100));
+                target = document.querySelector(`.mes[mesid="${id}"]`);
+                pollCount++;
+            }
             
             if (target) {
                 if (tempLimit === 0) {
@@ -369,47 +330,30 @@ async function executeJump(id, visualItem = null) {
                 }
             }
         }
-        
-        if (!target) {
-            let showMore = document.querySelector('#show_more_messages');
-            let maxClicks = 30;
-            if (visualItem) visualItem.style.opacity = "0.5";
-            
-            while (!target && showMore && showMore.offsetParent !== null && maxClicks > 0) {
-                showMore.click();
-                await new Promise(r => setTimeout(r, 800));
-                target = document.querySelector(`.mes[mesid="${id}"]`);
-                showMore = document.querySelector('#show_more_messages');
-                maxClicks--;
-            }            
-            if (visualItem) visualItem.style.opacity = "1";
-        }
     }
 
     if (target) {
         target.scrollIntoView({ behavior: "smooth", block: "start" });
         
-        const markColor = getComputedStyle(document.documentElement).getPropertyValue('--history-mark-bg').trim() || '#ff9800';
-        target.style.transition = "outline 0.3s ease";
-        target.style.outline = `3px solid ${markColor}`; 
-        target.style.outlineOffset = "2px";
-        target.style.borderRadius = "8px";
+        const markColor = getComputedStyle(document.documentElement).getPropertyValue('--chat-search-mark-bg').trim() || '#ffd54a';
+        target.style.transition = "background-color 0.3s ease, color 0.3s ease";
+        target.style.backgroundColor = markColor;
+        target.style.color = "#000";
         setTimeout(() => { 
-            target.style.outline = "transparent"; 
-            target.style.outlineOffset = "0px";
-            target.style.borderRadius = "";
+            target.style.backgroundColor = "";
+            target.style.color = "";
         }, 2500);
         
-        document.querySelector("#history-search-panel")?.remove();
-        document.querySelector("#history-results-panel")?.remove();
-        document.querySelector("#history-preview-panel")?.remove();
+        document.querySelector("#chat-search-panel")?.remove();
+        document.querySelector("#search-results-panel")?.remove();
+        document.querySelector("#message-preview-panel")?.remove();
     } else {
-        toastr.error(`搜索超时：第 ${id} 楼的记录过于早期，请手动向上滚动加载更多记录后重试。`);
+        toastr.error(`搜索超时：第 ${id} 楼的记录过于早期，请向上滚动加载更多记录后重试。`);
     }
 }
 
-function searchHistory() {
-    let input = document.querySelector("#history-keyword");
+function performSearch() {
+    let input = document.querySelector("#search-keyword");
     let rawKey = input.value.trim();
     
     if (!rawKey) {
@@ -439,24 +383,26 @@ function searchHistory() {
         return;
     }
     
-    openResultsPanel(found, keys, rawKey);
+    openSearchResults(found, keys, rawKey);
 }
 
-function openResultsPanel(found, keys, rawKey) {
-    const searchPanel = document.querySelector("#history-search-panel");
+function openSearchResults(found, keys, rawKey) {
+    const searchPanel = document.querySelector("#chat-search-panel");
     if (searchPanel) searchPanel.style.display = 'none';
     
-    let old = document.querySelector("#history-results-panel");
+    let old = document.querySelector("#search-results-panel");
     if (old) old.remove();
     
     let panel = document.createElement("div");
-    panel.id = "history-results-panel";
-    applyHistoryScale(panel);
+    panel.id = "search-results-panel";
     
     panel.innerHTML = `
         <div class="results-header">
             <button class="results-back" title="返回搜索面板">&lt;</button>
-            <span>搜索到 ${found.length} 条消息</span>
+            <div class="results-title-group">
+                <span class="results-title">搜索到 ${found.length} 条消息</span>
+                <span class="results-hint">点击消息内容可跳转至该楼层</span>
+            </div>
             <button class="results-close" title="关闭">&times;</button>
         </div>
         <div class="results-content">
@@ -465,14 +411,14 @@ function openResultsPanel(found, keys, rawKey) {
                     <div class="results-item-header">
                         <div class="results-meta">
                             <div class="results-number">${item.index} 楼</div>
-                            <div class="results-name">${escapeHtml(item.name)}</div>
+                            <div class="results-name">${sanitizeHtml(item.name)}</div>
                         </div>
                         <div class="results-actions">
                             <button class="results-copy">复制</button>
                             <button class="results-preview">预览相邻楼层</button>
                         </div>
                     </div>
-                    <div class="results-message">${highlightText(item.text, keys)}</div>
+                    <div class="results-message">${markKeywords(item.text, keys)}</div>
                 </div>
             `).join("")}
         </div>
@@ -509,7 +455,7 @@ function openResultsPanel(found, keys, rawKey) {
             e.stopPropagation();
             let id = Number(btn.closest('.results-item').dataset.id);
             panel.style.display = 'none';
-            openPreviewPanel(id, panel);
+            openMessagePreview(id, panel);
         };
     });
     
@@ -517,13 +463,13 @@ function openResultsPanel(found, keys, rawKey) {
         item.onclick = (e) => {
             if (e.target.closest('button')) return;
             let id = item.dataset.id;
-            executeJump(id, item);
+            jumpToFloor(id, item);
         };
     });
 }
 
-function openPreviewPanel(centerId, parentPanel = null) {
-    let old = document.querySelector("#history-preview-panel");
+function openMessagePreview(centerId, parentPanel = null) {
+    let old = document.querySelector("#message-preview-panel");
     if (old) old.remove();
 
     let chat = SillyTavern.getContext().chat;
@@ -533,8 +479,7 @@ function openPreviewPanel(centerId, parentPanel = null) {
     let end = Math.min(chat.length - 1, centerId + 2);
 
     let panel = document.createElement("div");
-    panel.id = "history-preview-panel";
-    applyHistoryScale(panel);
+    panel.id = "message-preview-panel";
 
     let html = `
         <div class="preview-header">
@@ -553,8 +498,8 @@ function openPreviewPanel(centerId, parentPanel = null) {
                     <div class="preview-number">${i} 楼</div>
                     <button class="preview-copy" title="复制该消息"><i class="fa-regular fa-copy"></i></button>
                 </div>
-                <div class="preview-name">${escapeHtml(msg.name || "未知")}</div>
-                <div class="preview-message">${escapeHtml(msg.mes || "")}</div>
+                <div class="preview-name">${sanitizeHtml(msg.name || "未知")}</div>
+                <div class="preview-message">${sanitizeHtml(msg.mes || "")}</div>
             </div>
         `;
     }
@@ -572,8 +517,8 @@ function openPreviewPanel(centerId, parentPanel = null) {
 
     panel.querySelector(".preview-close").onclick = () => {
         panel.remove();
-        document.querySelector("#history-search-panel")?.remove();
-        document.querySelector("#history-results-panel")?.remove();
+        document.querySelector("#chat-search-panel")?.remove();
+        document.querySelector("#search-results-panel")?.remove();
     };
 
     panel.querySelectorAll(".preview-copy").forEach(btn => {
@@ -602,7 +547,6 @@ function openPreviewPanel(centerId, parentPanel = null) {
     } else {
         injectWandMenu();
     }
-    setTimeout(injectWandMenu, 2000);
     
     setTimeout(() => {
         const saved = getSavedTruncation();
@@ -620,9 +564,10 @@ function openPreviewPanel(centerId, parentPanel = null) {
     
     if (window.visualViewport) {
         const handleViewport = () => {
+            const panels = document.querySelectorAll('#chat-search-panel, #search-results-panel, #message-preview-panel');
+            if (panels.length === 0) return;            
             const keyboardHeight = window.innerHeight - window.visualViewport.height;
             const isMobile = window.innerWidth <= 600;
-            const panels = document.querySelectorAll('#history-search-panel, #history-results-panel, #history-preview-panel');
             panels.forEach(p => p.classList.toggle('keyboard-open', isMobile && keyboardHeight > 100));
         };
         window.visualViewport.addEventListener('resize', handleViewport);
