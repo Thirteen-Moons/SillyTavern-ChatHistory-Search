@@ -6,6 +6,12 @@
 
 ---
 
+## ❗澄清声明
+关于此插件近期被污蔑为抄袭的澄清，详见文档，有完整时间线与证据链。
+[澄清文档](https://objects.githubusercontent.com/github-production-repository-file-5c1aeb/1305320865/30591835?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260731%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260731T140134Z&X-Amz-Expires=300&X-Amz-Signature=d20b819a9889fa93e8a6b2402e279cc406635f1fa3bbfc5ecaca1393050ad7f8&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3Bfilename%3Ddefault.docx&response-content-type=application%2Fvnd.openxmlformats-officedocument.wordprocessingml.document)
+
+---
+
 ## ⭐ 功能
 - 通过关键词搜索历史楼层
 - 快速回顶回底
@@ -80,4 +86,5 @@
 See [LICENSE](./LICENSE).
 
 ---
+
 ## 欢迎使用🤝
