@@ -7,8 +7,8 @@
 ---
 
 ## ❗澄清声明
-关于此插件近期被污蔑为抄袭的澄清，详见文档，有完整时间线与证据链。
-[澄清文档](https://objects.githubusercontent.com/github-production-repository-file-5c1aeb/1305320865/30591835?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260731%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260731T140134Z&X-Amz-Expires=300&X-Amz-Signature=d20b819a9889fa93e8a6b2402e279cc406635f1fa3bbfc5ecaca1393050ad7f8&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3Bfilename%3Ddefault.docx&response-content-type=application%2Fvnd.openxmlformats-officedocument.wordprocessingml.document)
+关于此插件近期被污蔑为抄袭的澄清，详见wiki，有完整时间线与证据链。
+[澄清声明](https://github.com/Thirteen-Moons/SillyTavern-ChatHistory-Search/wiki/%E5%85%B3%E4%BA%8E%E6%AD%A4%E6%8F%92%E4%BB%B6%E8%BF%91%E6%9C%9F%E8%A2%AB%E6%B1%A1%E8%94%91%E4%B8%BA%E6%8A%84%E8%A2%AD%E7%9A%84%E6%BE%84%E6%B8%85)
 
 ---
 
