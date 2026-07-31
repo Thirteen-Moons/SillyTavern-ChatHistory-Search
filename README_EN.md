@@ -5,6 +5,13 @@ A lightweight plugin built for SillyTavern.
 Version: 1.5.0 | Author: Thirteen-Moons
 
 ---
+## ❗Clarification statement
+For clarification regarding recent allegations of plagiarism against this plugin, please refer to the wiki, which contains a complete timeline and evidence chain.
+[Clarification statement](https://github.com/Thirteen-Moons/SillyTavern-ChatHistory-Search/wiki/%E5%85%B3%E4%BA%8E%E6%AD%A4%E6%8F%92%E4%BB%B6%E8%BF%91%E6%9C%9F%E8%A2%AB%E6%B1%A1%E8%94%91%E4%B8%BA%E6%8A%84%E8%A2%AD%E7%9A%84%E6%BE%84%E6%B8%85)
+
+<br>
+
+---
 
 ## ⭐ Features
 - Search past chat turns by keywords
