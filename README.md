@@ -6,12 +6,6 @@
 
 ---
 
-## ❗澄清声明
-关于此插件近期被污蔑为抄袭的澄清，详见wiki，有完整时间线与证据链。
-[澄清声明](https://github.com/Thirteen-Moons/SillyTavern-ChatHistory-Search/wiki/%E5%85%B3%E4%BA%8E%E6%AD%A4%E6%8F%92%E4%BB%B6%E8%BF%91%E6%9C%9F%E8%A2%AB%E6%B1%A1%E8%94%91%E4%B8%BA%E6%8A%84%E8%A2%AD%E7%9A%84%E6%BE%84%E6%B8%85)
-
----
-
 ## ⭐ 功能
 - 通过关键词搜索历史楼层
 - 快速回顶回底
@@ -88,3 +82,11 @@ See [LICENSE](./LICENSE).
 ---
 
 ## 欢迎使用🤝
+
+---
+
+## ❗澄清声明
+关于此插件近期被污蔑为抄袭的澄清，详见wiki，有完整时间线与证据链。
+[澄清声明](https://github.com/Thirteen-Moons/SillyTavern-ChatHistory-Search/wiki/%E5%85%B3%E4%BA%8E%E6%AD%A4%E6%8F%92%E4%BB%B6%E8%BF%91%E6%9C%9F%E8%A2%AB%E6%B1%A1%E8%94%91%E4%B8%BA%E6%8A%84%E8%A2%AD%E7%9A%84%E6%BE%84%E6%B8%85)
+
+---
