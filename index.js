@@ -1,6 +1,7 @@
 // Copyright (c) 2026 Thirteen-Moons
 // Licensed under AGPL-3.0; see LICENSE for full terms
 // Derivative works must retain attribution to Thirteen-Moons
+// 聊天记录搜索 v1.6.0
 
 const LS_KEY = 'chatSearchTruncation';
 
@@ -160,7 +161,7 @@ function openSearchPanel() {
     panel.innerHTML = `
         <div class="search-header">
             <span><i class="fa-solid fa-search fa-flip-horizontal" style="margin-right:6px;"></i>聊天记录搜索</span>
-            <button id="search-close">&times;</button>
+            <button id="search-close" class="search-icon-btn">&times;</button>
         </div>
         
         <div class="search-divider"></div>
@@ -173,8 +174,13 @@ function openSearchPanel() {
         </div>
 
         <div class="search-input-row">
-            <input id="search-keyword" placeholder="输入关键词">
+            <input id="search-keyword" placeholder="包含的关键词，多关键词以空格分隔">
             <button id="search-start-btn">搜索</button>
+        </div>
+
+        <div class="search-input-row">
+            <input id="search-exclude-keyword" placeholder="需排除的关键词，留空则不排除">
+            <button style="visibility:hidden;pointer-events:none;flex-shrink:0;white-space:nowrap;padding:10px 14px;font-size:15px;border:1px solid transparent;" aria-hidden="true">搜索</button>
         </div>
     `;
 
@@ -184,6 +190,10 @@ function openSearchPanel() {
     panel.querySelector("#search-start-btn").onclick = () => { performSearch(); };
     
     panel.querySelector("#search-keyword").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") performSearch();
+    });
+
+    panel.querySelector("#search-exclude-keyword").addEventListener("keypress", function(e) {
         if (e.key === "Enter") performSearch();
     });
 
@@ -279,7 +289,7 @@ function updateMarkColor() {
     }
 }
 
-async function jumpToFloor(id, visualItem = null) {
+async function jumpToFloor(id) {
     id = Number(id);
     let total = 0;
     try { total = SillyTavern.getContext().chat.length; } catch (e) {}
@@ -348,7 +358,7 @@ async function jumpToFloor(id, visualItem = null) {
         document.querySelector("#search-results-panel")?.remove();
         document.querySelector("#message-preview-panel")?.remove();
     } else {
-        toastr.error(`搜索超时：第 ${id} 楼的记录过于早期，请向上滚动加载更多记录后重试。`);
+        toastr.error(`搜索超时：第 ${id} 楼的记录过于早期，请手动向上滚动加载更多记录后重试。`);
     }
 }
 
@@ -357,14 +367,21 @@ function performSearch() {
     let rawKey = input.value.trim();
     
     if (!rawKey) {
-        toastr.error("请输入关键词");
+        toastr.error("请输入包含的关键词");
         return;
     }
     
     let keys = rawKey.split(/\s+/).filter(k => k.length > 0);
     if (keys.length === 0) {
-        toastr.error("请输入关键词");
+        toastr.error("请输入包含的关键词");
         return;
+    }
+    
+    let excludeInput = document.querySelector("#search-exclude-keyword");
+    let rawExclude = excludeInput ? excludeInput.value.trim() : "";
+    let excludeKeys = [];
+    if (rawExclude) {
+        excludeKeys = rawExclude.split(/\s+/).filter(k => k.length > 0);
     }
     
     let chat = SillyTavern.getContext().chat;
@@ -373,20 +390,33 @@ function performSearch() {
     chat.forEach((msg, index) => {
         let text = msg.mes || "";
         let lowerText = text.toLowerCase();
-        if (keys.every(k => lowerText.includes(k.toLowerCase()))) {
-            found.push({ index: index, name: msg.name || "未知", text: text });
+        
+        if (!keys.every(k => lowerText.includes(k.toLowerCase()))) {
+            return;
         }
+        
+        if (excludeKeys.length > 0) {
+            if (excludeKeys.some(k => lowerText.includes(k.toLowerCase()))) {
+                return;
+            }
+        }
+        
+        found.push({ index: index, name: msg.name || "未知", text: text });
     });
     
     if (found.length === 0) {
-        toastr.info("未搜索到：" + rawKey);
+        let msg = "未搜索到：" + rawKey;
+        if (excludeKeys.length > 0) {
+            msg += "（排除：" + rawExclude + "）";
+        }
+        toastr.info(msg);
         return;
     }
     
-    openSearchResults(found, keys, rawKey);
+    openSearchResults(found, keys);
 }
 
-function openSearchResults(found, keys, rawKey) {
+function openSearchResults(found, keys) {
     const searchPanel = document.querySelector("#chat-search-panel");
     if (searchPanel) searchPanel.style.display = 'none';
     
@@ -398,12 +428,12 @@ function openSearchResults(found, keys, rawKey) {
     
     panel.innerHTML = `
         <div class="results-header">
-            <button class="results-back" title="返回搜索面板">&lt;</button>
+            <button class="results-back search-icon-btn" title="返回搜索面板">&lt;</button>
             <div class="results-title-group">
                 <span class="results-title">搜索到 ${found.length} 条消息</span>
                 <span class="results-hint">点击消息内容可跳转至该楼层</span>
             </div>
-            <button class="results-close" title="关闭">&times;</button>
+            <button class="results-close search-icon-btn" title="关闭">&times;</button>
         </div>
         <div class="results-content">
             ${found.map((item) => `
@@ -436,35 +466,37 @@ function openSearchResults(found, keys, rawKey) {
         searchPanel?.remove();
     };
     
-    panel.querySelectorAll(".results-copy").forEach((btn) => {
-        btn.onclick = async (e) => {
+    // 事件委托：在 results-content 容器上统一处理所有点击
+    panel.querySelector(".results-content").addEventListener("click", async (e) => {
+
+        const copyBtn = e.target.closest(".results-copy");
+        if (copyBtn) {
             e.stopPropagation();
-            let id = Number(btn.closest('.results-item').dataset.id);
+            let id = Number(copyBtn.closest('.results-item').dataset.id);
             let chat = SillyTavern.getContext().chat;
             let msg = chat[id];
             if (msg) {
                 const success = await copyToClipboard(msg.mes || "");
-                btn.innerText = success ? "已复制" : "失败";
-                setTimeout(() => { btn.innerText = "复制"; }, 1500);
+                copyBtn.innerText = success ? "已复制" : "失败";
+                setTimeout(() => { copyBtn.innerText = "复制"; }, 1500);
             }
-        };
-    });
-    
-    panel.querySelectorAll(".results-preview").forEach((btn) => {
-        btn.onclick = (e) => {
+            return;
+        }
+
+        const previewBtn = e.target.closest(".results-preview");
+        if (previewBtn) {
             e.stopPropagation();
-            let id = Number(btn.closest('.results-item').dataset.id);
+            let id = Number(previewBtn.closest('.results-item').dataset.id);
             panel.style.display = 'none';
             openMessagePreview(id, panel);
-        };
-    });
-    
-    panel.querySelectorAll(".results-item").forEach(item => {
-        item.onclick = (e) => {
-            if (e.target.closest('button')) return;
+            return;
+        }
+
+        const item = e.target.closest(".results-item");
+        if (item && !e.target.closest('button')) {
             let id = item.dataset.id;
-            jumpToFloor(id, item);
-        };
+            jumpToFloor(id);
+        }
     });
 }
 
@@ -483,9 +515,9 @@ function openMessagePreview(centerId, parentPanel = null) {
 
     let html = `
         <div class="preview-header">
-            <button class="preview-back" title="返回">&lt;</button>
+            <button class="preview-back search-icon-btn" title="返回">&lt;</button>
             <span>预览 ${start} ~ ${end} 楼</span>
-            <button class="preview-close" title="关闭">&times;</button>
+            <button class="preview-close search-icon-btn" title="关闭">&times;</button>
         </div>
         <div class="preview-content">
     `;
@@ -521,18 +553,18 @@ function openMessagePreview(centerId, parentPanel = null) {
         document.querySelector("#search-results-panel")?.remove();
     };
 
-    panel.querySelectorAll(".preview-copy").forEach(btn => {
-        btn.onclick = async (e) => {
-            e.stopPropagation();
-            let idx = Number(btn.closest('.preview-item').dataset.index);
-            let msg = chat[idx];
-            if (msg) {
-                const success = await copyToClipboard(msg.mes || "");
-                let original = btn.innerHTML;
-                btn.innerHTML = success ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>';
-                setTimeout(() => { btn.innerHTML = original; }, 1500);
-            }
-        };
+    panel.querySelector(".preview-content").addEventListener("click", async (e) => {
+        const btn = e.target.closest(".preview-copy");
+        if (!btn) return;
+        e.stopPropagation();
+        let idx = Number(btn.closest('.preview-item').dataset.index);
+        let msg = chat[idx];
+        if (msg) {
+            const success = await copyToClipboard(msg.mes || "");
+            let original = btn.innerHTML;
+            btn.innerHTML = success ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>';
+            setTimeout(() => { btn.innerHTML = original; }, 1500);
+        }
     });
 }
 
@@ -540,6 +572,10 @@ function openMessagePreview(centerId, parentPanel = null) {
    初始化
 ========================= */
 (function initExtension() {
+    ['historySearchTruncation', 'historySearchScale', 'historySearchIcons'].forEach(k => {
+        if (localStorage.getItem(k)) localStorage.removeItem(k);
+    });
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
             injectWandMenu();
