@@ -2,7 +2,7 @@
 <br>
 A lightweight plugin built for SillyTavern.
 
-Version: 1.6.0 | Author: Thirteen-Moons
+Version: 1.6.1 | Author: Thirteen-Moons
 
 ---
 
@@ -68,6 +68,9 @@ Scroll through surrounding messages freely; click the top-right button to copy t
 - **Added**: Exclude keyword logic
 - **UI changes**: Added an exclude keyword input box, changed some button dashed borders to solid.
 - **Performance optimisation**: Reduced the number of event listeners by using event delegation, so there is only one click listener even with a large number of search results, lowering memory usage and optimising performance.
+
+### v1.6.1
+Fixed the issue where the UI and instructional text did not display well in light theme.
 <br>
 
 ---
