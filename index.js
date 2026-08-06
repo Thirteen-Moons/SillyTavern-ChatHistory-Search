@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Thirteen-Moons
 // Licensed under AGPL-3.0; see LICENSE for full terms
 // Derivative works must retain attribution to Thirteen-Moons
-// 聊天记录搜索 v1.6.0
+// 聊天记录搜索 v1.6.1
 
 const LS_KEY = 'chatSearchTruncation';
 
