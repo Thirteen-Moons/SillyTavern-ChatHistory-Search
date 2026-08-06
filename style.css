@@ -3,7 +3,7 @@ Copyright (c) 2026 Thirteen-Moons
 Licensed under AGPL-3.0; see LICENSE for full terms
 Derivative works must retain attribution to Thirteen-Moons
 ========================= */
-/* 聊天记录搜索 v1.5.0 */
+/* 聊天记录搜索 v1.6.0 */
 
 /* =========================
    魔棒菜单项
@@ -78,27 +78,6 @@ Derivative works must retain attribution to Thirteen-Moons
     margin-bottom: 10px;
 }
 
-#search-close {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: transparent;
-    border: 1px dashed var(--SmartThemeTextColor, rgba(255,255,255,0.5));
-    color: var(--SmartThemeTextColor);
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: 0.15s;
-}
-
-#search-close:hover {
-    background: rgba(255,255,255,0.1);
-}
-
 .search-divider {
     height: 1px;
     background: var(--SmartThemeTextColor, rgba(255,255,255,0.3));
@@ -123,7 +102,8 @@ Derivative works must retain attribution to Thirteen-Moons
 }
 
 #search-keyword,
-#search-jump-input {
+#search-jump-input,
+#search-exclude-keyword {
     flex: 1;
     padding: 10px;
     border-radius: 10px;
@@ -134,21 +114,24 @@ Derivative works must retain attribution to Thirteen-Moons
 }
 
 #search-keyword::placeholder,
-#search-jump-input::placeholder {
+#search-jump-input::placeholder,
+#search-exclude-keyword::placeholder {
     color: var(--SmartThemeTextColor, #fff);
     opacity: 0.5;
 }
 
 #search-jump-btn,
 #search-start-btn {
-    padding: 6px 14px;
+    padding: 10px 14px;
     border-radius: 10px;
     cursor: pointer;
     background: transparent;
     color: var(--SmartThemeTextColor);
-    border: 1px dashed var(--SmartThemeTextColor, rgba(255,255,255,0.4));
+    border: 1px solid var(--SmartThemeTextColor, rgba(255,255,255,0.4));
     transition: 0.15s;
     font-size: 15px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 #search-jump-btn:hover,
@@ -208,29 +191,6 @@ Derivative works must retain attribution to Thirteen-Moons
     font-size: 0.55em;
     opacity: 0.6;
     color: var(--SmartThemeTextColor);
-}
-
-.results-back,
-.results-close {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: transparent;
-    border: 1px dashed var(--SmartThemeTextColor, rgba(255,255,255,0.5));
-    color: var(--SmartThemeTextColor);
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: 0.15s;
-}
-
-.results-back:hover,
-.results-close:hover {
-    background: rgba(255,255,255,0.1);
 }
 
 .results-content {
@@ -318,7 +278,7 @@ mark {
     padding: 1px 3px;
 }
 
-/* =========================mark
+/* =========================
    预览面板
 ========================= */
 #message-preview-panel {
@@ -352,29 +312,6 @@ mark {
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 10px;
-}
-
-.preview-back,
-.preview-close {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: transparent;
-    border: 1px dashed var(--SmartThemeTextColor, rgba(255,255,255,0.5));
-    color: var(--SmartThemeTextColor);
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: 0.15s;
-}
-
-.preview-back:hover,
-.preview-close:hover {
-    background: rgba(255,255,255,0.1);
 }
 
 .preview-content {
@@ -430,6 +367,38 @@ mark {
 }
 
 .preview-copy:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* =========================
+   统一圆形图标按钮样式 
+========================= */
+#search-close,
+.results-back,
+.results-close,
+.preview-back,
+.preview-close {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--SmartThemeTextColor, rgba(255,255,255,0.5));
+    color: var(--SmartThemeTextColor);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: 0.15s;
+}
+
+#search-close:hover,
+.results-back:hover,
+.results-close:hover,
+.preview-back:hover,
+.preview-close:hover {
     background: rgba(255,255,255,0.1);
 }
 
