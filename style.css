@@ -3,7 +3,7 @@ Copyright (c) 2026 Thirteen-Moons
 Licensed under AGPL-3.0; see LICENSE for full terms
 Derivative works must retain attribution to Thirteen-Moons
 ========================= */
-/* 聊天记录搜索 v1.6.0 */
+/* 聊天记录搜索 v1.6.1 */
 
 /* =========================
    魔棒菜单项
@@ -80,7 +80,7 @@ Derivative works must retain attribution to Thirteen-Moons
 
 .search-divider {
     height: 1px;
-    background: var(--SmartThemeTextColor, rgba(255,255,255,0.3));
+    background: var(--SmartThemeBorderColor, rgba(255,255,255,0.3));
     opacity: 0.4;
     margin-bottom: 12px;
 }
@@ -116,7 +116,7 @@ Derivative works must retain attribution to Thirteen-Moons
 #search-keyword::placeholder,
 #search-jump-input::placeholder,
 #search-exclude-keyword::placeholder {
-    color: var(--SmartThemeTextColor, #fff);
+    color: var(--SmartThemeTextColor, currentColor);
     opacity: 0.5;
 }
 
@@ -127,7 +127,7 @@ Derivative works must retain attribution to Thirteen-Moons
     cursor: pointer;
     background: transparent;
     color: var(--SmartThemeTextColor);
-    border: 1px solid var(--SmartThemeTextColor, rgba(255,255,255,0.4));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.4));
     transition: 0.15s;
     font-size: 15px;
     white-space: nowrap;
@@ -260,7 +260,7 @@ Derivative works must retain attribution to Thirteen-Moons
     cursor: pointer;
     background: transparent;
     color: var(--SmartThemeTextColor);
-    border: 1px solid var(--SmartThemeTextColor, rgba(255,255,255,0.4));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.4));
     transition: 0.15s;
     font-size: 0.9em;
     white-space: nowrap;
@@ -356,7 +356,7 @@ mark {
     border-radius: 8px;
     background: transparent;
     color: var(--SmartThemeTextColor);
-    border: 1px solid var(--SmartThemeTextColor, rgba(255,255,255,0.4));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.4));
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -382,7 +382,7 @@ mark {
     height: 24px;
     border-radius: 50%;
     background: transparent;
-    border: 1px solid var(--SmartThemeTextColor, rgba(255,255,255,0.5));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.5));
     color: var(--SmartThemeTextColor);
     font-size: 16px;
     line-height: 1;
