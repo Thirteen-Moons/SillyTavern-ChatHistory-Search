@@ -2,7 +2,7 @@
 <br>
 A lightweight plugin built for SillyTavern.
 
-Version: 1.5.0 | Author: Thirteen-Moons
+Version: 1.6.0 | Author: Thirteen-Moons
 
 ---
 
@@ -31,6 +31,7 @@ Click *"Chat History Search"* to open the shortcut panel.
 - **Jump**: Enter a turn number to navigate directly to that entry
 - **Search**: Input keywords to open the *"Search Results Page"*
   > Multiple keywords are supported; separate each keyword with a single space
+- **Exclude**: Enter the keywords to be excluded. Messages containing the excluded keywords will not appear in the search results, even if they contain *"included keywords"*, leave blank to not exclude.
 <br>
 
 ### ✅ Search Results Page
@@ -58,6 +59,15 @@ Scroll through surrounding messages freely; click the top-right button to copy t
 - **New Preview Page**: Smoothly browse adjacent chat turns without full page navigation
 - **Mobile Display Improvements**: The interface now shifts upward automatically when the soft keyboard pops up on mobile, preventing the input box from being covered
 - **Optimized Jump Logic**: Instead of temporarily loading all messages, the plugin only loads the minimal required range to reduce lag during jumps
+
+### v1.5.0
+- Rename variables, clean up historical redundant and deprecated code
+- Overall performance optimisation
+
+### v1.6.0
+- **Added**: Exclude keyword logic
+- **UI changes**: Added an exclude keyword input box, changed some button dashed borders to solid.
+- **Performance optimisation**: Reduced the number of event listeners by using event delegation, so there is only one click listener even with a large number of search results, lowering memory usage and optimising performance.
 <br>
 
 ---
